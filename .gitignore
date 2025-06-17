@@ -1,0 +1,7 @@
+# Java / Eclipse
+*.class *.log *.iml *.ipr *.iws .idea/ .project .classpath .settings/
+# Maven
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+# OS
+.DS_Store Thumbs.db

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PDF Merger | Merge PDFs Online</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      padding: 30px 10px;
+      backdrop-filter: blur(10px);
+      background: rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    header h1 {
+      font-size: 36px;
+      margin: 0;
+      color: #ffffff;
+    }
+
+    header p {
+      font-size: 16px;
+      color: #aaa;
+      margin-top: 8px;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+      backdrop-filter: blur(12px);
+      padding: 40px 30px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .file-upload {
+      position: relative;
+      display: inline-block;
+      margin: 20px 0;
+    }
+
+    .file-upload input[type="file"] {
+      display: none;
+    }
+
+    .file-upload-label {
+      background-color: #00c9ff;
+      color: #000;
+      padding: 12px 28px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(0, 201, 255, 0.4);
+      transition: background 0.3s ease;
+      display: inline-block;
+    }
+
+    .file-upload-label:hover {
+      background-color: #aeefff;
+    }
+
+    .file-name {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    button {
+      margin: 10px 8px;
+      background-color: #00c9ff;
+      color: #000;
+      padding: 12px 28px;
+      font-size: 16px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(0, 201, 255, 0.4);
+      transition: background 0.3s, transform 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #aeefff;
+      transform: translateY(-2px);
+    }
+
+    #status {
+      margin-top: 15px;
+      color: #aaa;
+      font-size: 14px;
+    }
+
+    footer {
+      background: rgba(0, 0, 0, 0.4);
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+      color: #888;
+      backdrop-filter: blur(8px);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    footer a {
+      color: #aeefff;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>PDF Merger</h1>
+    <p>Merge your PDF files easily and securely ✨</p>
+  </header>
+
+  <main>
+    <div class="card">
+      <form id="uploadForm">
+        <div class="file-upload">
+          <label for="pdfs" class="file-upload-label">📂 Choose PDFs</label>
+          <input type="file" id="pdfs" name="files" multiple accept="application/pdf" required />
+          <div id="fileName" class="file-name">No files selected</div>
+        </div>
+        <div>
+          <button type="submit">🔄 Merge PDFs</button>
+          <button id="downloadBtn" type="button" class="hidden">⬇️ Download Merged PDF</button>
+        </div>
+      </form>
+      <p id="status"></p>
+    </div>
+  </main>
+
+  <footer>
+    <p>Built with 💻 and ☕ by <strong>Evan Ferrao (23BAI1262)</strong></p>
+    <p>Contact us: <a href="mailto:evan.ferrao2023@vitstudent.ac.in">evan.ferrao2023@vitstudent.ac.in</a></p>
+    <p>Devops Project Project – June 2025</p>
+  </footer>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const fileInput = document.getElementById('pdfs');
+    const fileName = document.getElementById('fileName');
+    const status = document.getElementById('status');
+    const downloadBtn = document.getElementById('downloadBtn');
+    let mergedPDFBlobUrl = null;
+
+    fileInput.addEventListener('change', () => {
+      const files = Array.from(fileInput.files).map(f => f.name).join(', ');
+      fileName.innerText = files || 'No files selected';
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.innerText = 'Uploading and merging PDFs...';
+      downloadBtn.classList.add('hidden');
+      if (mergedPDFBlobUrl) {
+        URL.revokeObjectURL(mergedPDFBlobUrl);
+        mergedPDFBlobUrl = null;
+      }
+
+      const files = fileInput.files;
+      if (files.length < 2) {
+        status.innerText = '⚠️ Please select at least two PDF files.';
+        return;
+      }
+
+      const formData = new FormData();
+      for (let file of files) {
+        formData.append('files', file);
+      }
+
+      try {
+        const response = await fetch('/merge', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) throw new Error('Server error');
+
+        const blob = await response.blob();
+        mergedPDFBlobUrl = URL.createObjectURL(blob);
+        status.innerText = '✅ Merged PDF ready. Click download.';
+        downloadBtn.classList.remove('hidden');
+      } catch (err) {
+        status.innerText = '❌ Error: ' + err.message;
+      }
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      if (mergedPDFBlobUrl) {
+        const link = document.createElement('a');
+        link.href = mergedPDFBlobUrl;
+        link.download = 'merged.pdf';
+        link.click();
+      }
+    });
+  </script>
+
+</body>
+</html>
