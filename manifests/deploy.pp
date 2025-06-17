@@ -10,7 +10,7 @@ file { '/opt/pdfmerger':
 
 file { '/opt/pdfmerger/pdf-merger.jar':
   ensure => file,
-  source => "file:///home/ubuntubox/Desktop/pdf-merger/pdf-merger-1.0.0.jar",
+  source => "file:///home/ubuntubox/Desktop/pdf-merger/target/pdf-merger-1.0.0.jar",
   mode   => '0755',
 }
 
