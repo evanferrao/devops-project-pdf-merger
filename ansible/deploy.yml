@@ -4,20 +4,26 @@
   #become: yes
 
   tasks:
+    - name: Create /tmp/target directory
+      file:
+        path: /tmp/target
+        state: directory
+        mode: '0755'
+
     - name: Copy JAR file
       copy:
         src: ../target/pdf-merger-1.0.0.jar
-        dest: /home/ubuntubox/pdf-merger-1.0.0.jar
+        dest: /tmp/target/pdf-merger-1.0.0.jar
 
     - name: Copy Dockerfile
       copy:
         src: ../Dockerfile
-        dest: /home/ubuntubox/Dockerfile
+        dest: /tmp/Dockerfile
 
     - name: Build Docker image
       command: docker build -t pdf-merger-app .
       args:
-        chdir: /home/ubuntubox/
+        chdir: /tmp
 
     - name: Remove existing container (if any)
       shell: docker rm -f pdfmerger || true
@@ -26,3 +32,4 @@
     - name: Run Docker container
       command: docker run -d -p 1234:1234 --name pdfmerger pdf-merger-app
       ignore_errors: true  # In case container already running
+

@@ -8,12 +8,6 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                git url: 'git@ubuntu:/home/git/pdf-merger.git', branch: 'master'
-            }
-        }
-
         stage('Build with Maven') {
             steps {
                 sh 'mvn clean package'
@@ -23,27 +17,6 @@ pipeline {
         stage('Run Unit Tests') {
             steps {
                 sh 'mvn test'
-            }
-        }
-
-        stage('Puppet Setup') {
-            steps {
-                sh 'sudo puppet apply manifests/pdfmerger.pp'
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t ${IMAGE_NAME} .'
-            }
-        }
-
-        stage('Run Docker Container') {
-            steps {
-                sh """
-                docker rm -f ${CONTAINER_NAME} || true
-                docker run -d -p 1234:1234 --name ${CONTAINER_NAME} ${IMAGE_NAME}
-                """
             }
         }
 
